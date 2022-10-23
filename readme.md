@@ -45,3 +45,10 @@ This repo is configured with the following features:
     * To add a new package in development use ``poetry add -g dev python_package_name``
 1. A pre-configured ``.gitignore, .pre-commit-config.yaml`` and ``pyproject.toml`` file
 1. And of course this amazing ``readme.md`` file
+
+
+# Build & Run docker image
+```console
+docker build . -t dashapp_skeleton
+docker run -p 8050:8050 dashapp_skeleton
+```
