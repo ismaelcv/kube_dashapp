@@ -1,36 +1,8 @@
 # Repo Skeleton
 This repository contains a barebone repository skeleton
-The idea is that you can clone and rename this repo and start a new project with all the tools you need. The correct way of creating a private fotk by duplicating the repo is documented [here](https://help.github.com/articles/duplicating-a-repository/). Following the next steps:
 
 
- 1. Create a bare clone of the repository.
-    (This is temporary and will be removed so just do it wherever.)
-    ```bash
-    git clone --bare git@github.com:source-ag/repo_skeleton.git
-    ```
 
- 2. Create a new private repository on Github and give it a good name, for example `my-project-repo`.
-
- 3. Mirror-push your bare clone to your new `my-project-repo`.
-    Replace your_username with your actual Github username in the url below.
-
-    ```bash
-    cd assignment-data-science
-    git push --mirror git@github.com:ismaelcv/my-project-repo.git
-    ```
-
- 4. Remove the temporary local repository you created in step 1.
-    ```bash
-    cd ..
-    rm -rf assignment-data-science
-    ```
-
- 5. You can now clone your repository on your machine.
-    ```bash
-    git clone git@github.com:<your_username>/my-project-repo.git
-    ```
-<Br>
-<Br>
 <Br>
 
 # ✅&nbsp; Getting Started

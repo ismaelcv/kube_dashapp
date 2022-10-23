@@ -25,9 +25,9 @@ ignore-imports = true
 extension-pkg-whitelist = "pydantic"
 
 [tool.poetry]
-name = "repo_skeleton"
+name = "dashapp_skeleton"
 version = "0.0.0"
-description = "Generic repo charged with all the good features"
+description = "Generic repo with a dash app connected to s3 and ready to go"
 authors = ["Ismael Cabral <ismael.cabral@amazing.yay>"]
 
 [tool.poetry.dependencies]
