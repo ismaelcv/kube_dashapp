@@ -9,5 +9,3 @@ def test_lambda_runs() -> None:
     response = generic_function()
 
     assert response["statusCode"] == 200
-
-
