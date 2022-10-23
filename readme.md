@@ -1,28 +1,22 @@
 # Repo Skeleton
 This repository contains a barebone repository skeleton
-The idea is that you can clone and rename this repo and start a new project with all the tools you need
+The idea is that you can clone and rename this repo and start a new project with all the tools you need. The correct way of creating a private fotk by duplicating the repo is documented [here](https://help.github.com/articles/duplicating-a-repository/). Following the next steps:
 
-
-the [repository](https://github.com/source-ag/assignment-data-science) for the assignment is public and Github does not allow the creation of private forks for public repositories.
-
-The correct way of creating a private frok by duplicating the repo is documented [here](https://help.github.com/articles/duplicating-a-repository/).
-
-For this assignment the commands are:
 
  1. Create a bare clone of the repository.
     (This is temporary and will be removed so just do it wherever.)
     ```bash
-    git clone --bare git@github.com:source-ag/assignment-data-science.git
+    git clone --bare git@github.com:source-ag/repo_skeleton.git
     ```
 
- 2. [Create a new private repository on Github](https://help.github.com/articles/creating-a-new-repository/) and give it a good name, for example `source-assignment-data-science`.
+ 2. Create a new private repository on Github and give it a good name, for example `my-project-repo`.
 
- 3. Mirror-push your bare clone to your new `source-assignment-data-science` repository.
-    > Replace `<your_username>` with your actual Github username in the url below.
+ 3. Mirror-push your bare clone to your new `my-project-repo`.
+    Replace your_username with your actual Github username in the url below.
 
     ```bash
     cd assignment-data-science
-    git push --mirror git@github.com:<your_username>/source-assignment-data-science.git
+    git push --mirror git@github.com:ismaelcv/my-project-repo.git
     ```
 
  4. Remove the temporary local repository you created in step 1.
@@ -31,11 +25,13 @@ For this assignment the commands are:
     rm -rf assignment-data-science
     ```
 
- 5. You can now clone your `source-assignment-data-science` repository on your machine (in my case in the `code` folder).
+ 5. You can now clone your repository on your machine.
     ```bash
-    git clone git@github.com:<your_username>/source-assignment-data-science.git
+    git clone git@github.com:<your_username>/my-project-repo.git
     ```
-
+<Br>
+<Br>
+<Br>
 
 # ✅&nbsp; Getting Started
 
