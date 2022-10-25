@@ -1,0 +1,6 @@
+{
+  "app": "python3 stacks.py",
+  "context": {
+    "@aws-cdk/core:newStyleStackSynthesis": true
+  }
+}

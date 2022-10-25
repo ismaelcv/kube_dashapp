@@ -36,6 +36,8 @@ poetry install
 This repo is configured with the following features:
 
 1. The python version is managed by pyenv and the virtual environment by virtualenv
+1. CI/CD pipeline for container deploment
+    * Configure AWS_ACCESS_KEY_ID and AWS_ACCESS_KEY
 1. CI/CD github action pipeline for code formating and testing
     * The code is automatically checked with ``pre-commit`` everytime the code is commited to main
     * To check the code is compliant run ``pre-commit run -a`` before commiting
