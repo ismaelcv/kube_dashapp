@@ -66,9 +66,9 @@ jobs:
       #     role-skip-session-tagging: true
       #     role-duration-seconds: 3600
 
-      # - name: Download task definition
-      #   run: |
-      #     aws ecs describe-task-definition --task-definition ${{ env.SERVICE_NAME }} --query taskDefinition > task-definition-${{ env.CI_ENVIRONMENT_NAME }}.json
+      - name: Download task definition
+        run: |
+          aws ecs describe-task-definition --task-definition ${{ env.SERVICE_NAME }} --query taskDefinition > task-definition-${{ env.CI_ENVIRONMENT_NAME }}.json
 
       # - name: Patch the awslogs-stream-prefix with image tag
       #   run: |
