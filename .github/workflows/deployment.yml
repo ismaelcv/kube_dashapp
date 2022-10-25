@@ -1,0 +1,89 @@
+name: DEV - CI/CD deployment pipeline
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "drydown_app/**"
+      - "poetry.lock"
+      - "Dockerfile"
+      - ".github/workflows/*"
+  workflow_dispatch:
+
+env:
+  ECR_REGISTRY: 501280619881.dkr.ecr.eu-central-1.amazonaws.com
+  ECR_REPOSITORY: control-drydown-app
+  SERVICE_NAME: control-drydown-app
+
+jobs:
+  build-push-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up Docker BuildX
+        uses: docker/setup-buildx-action@v1
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-central-1
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        run: |
+          aws ecr get-login-password --region eu-central-1 | docker login --username AWS --password-stdin ${{ env.ECR_REGISTRY }}
+
+      - name: Set image tag
+        id: set-image-tag
+        run: echo "::set-output name=image-tag::${GITHUB_SHA:0:7}"
+
+      - name: Build image
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          platforms: linux/amd64
+          tags: |
+            ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:${{ steps.set-image-tag.outputs.image-tag }}
+            ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:${{ env.CI_ENVIRONMENT_NAME }}
+          push: true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-central-1
+          role-to-assume: ${{ secrets.DEPLOYMENT_ROLE_DEVELOPMENT }}
+          role-skip-session-tagging: true
+          role-duration-seconds: 3600
+
+      # - name: Download task definition
+      #   run: |
+      #     aws ecs describe-task-definition --task-definition ${{ env.SERVICE_NAME }} --query taskDefinition > task-definition-${{ env.CI_ENVIRONMENT_NAME }}.json
+
+      # - name: Patch the awslogs-stream-prefix with image tag
+      #   run: |
+      #     jq ".containerDefinitions[].logConfiguration.options[\"awslogs-stream-prefix\"] = \"${{ steps.set-image-tag.outputs.image-tag }}\"" task-definition-${{ env.CI_ENVIRONMENT_NAME }}.json > task-definition-${{ env.CI_ENVIRONMENT_NAME }}-patched.json
+      #   shell: bash
+
+      # - name: Fill in the new image tag in the Amazon ECS task definition
+      #   id: task-def
+      #   uses: aws-actions/amazon-ecs-render-task-definition@v1
+      #   with:
+      #     task-definition: task-definition-${{ env.CI_ENVIRONMENT_NAME }}-patched.json
+      #     container-name: ${{ env.SERVICE_NAME }}-container
+      #     image: ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:${{ steps.set-image-tag.outputs.image-tag }}
+
+      # - name: Run Task on Amazon ECS
+      #   uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+      #   with:
+      #     task-definition: ${{ steps.task-def.outputs.task-definition }}
+      #     cluster: ${{ env.CI_ENVIRONMENT_NAME }}-cluster
+      #     service: ${{ env.SERVICE_NAME }}
+      #     wait-for-service-stability: true
