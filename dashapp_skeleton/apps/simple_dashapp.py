@@ -1,3 +1,6 @@
+import os
+from typing import Tuple
+
 import dash
 import plotly.graph_objects as go
 from dash import dcc, html
@@ -10,5 +13,18 @@ fig = go.Figure(data=go.Scatter(x=xs, y=ys))
 fig.update_layout(xaxis_title="Years", yaxis_title="$")
 app.layout = html.Div(children=[html.H1(children="Assets"), dcc.Graph(figure=fig)])
 
+
+@app.server.route("/health")
+def health() -> Tuple[dict, int]:
+    """
+    Function call to check if the app is running
+    """
+
+    return ({"status": "ok"}, 200)
+
+
+server = app.server
+
 if __name__ == "__main__":
-    app.run_server(debug=False, host="0.0.0.0", port=8050)  # prod
+    debug = os.environ.get("DEBUG", "false") == "true"
+    app.run_server(debug=debug, port="8094")

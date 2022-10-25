@@ -49,6 +49,13 @@ This repo is configured with the following features:
 
 # Build & Run docker image
 ```console
-docker build . -t dashapp_skeleton
-docker run -p 8050:8050 dashapp_skeleton
+docker build -t dashapp_skeleton:latest .
+docker run -p 8094:8094  dashapp_skeleton:latest
+```
+
+
+
+# To run the app in debug mode
+```console
+ export ENVIRONMENT=development
 ```
