@@ -61,3 +61,33 @@ docker run -p 8094:8094  dashapp_skeleton:latest
 ```console
  export ENVIRONMENT=development
 ```
+
+
+
+# ☁ CDK deployment
+
+In a new folder called infra run:
+```
+cdk init sample-app --language python 
+```
+The `cdk.json` file tells the CDK Toolkit how to execute your app.
+
+To manually create a virtualenv on MacOS and Linux:
+```
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+
+```
+
+```
+export AWS_ACCESS_REGION=$(aws --profile default configure get aws_region)
+```
+
+At this point you can now synthesize the CloudFormation template for this code.
+```
+cdk synth
+cdk bootstraap
+cdk deploy
+cdk destroy
+```
