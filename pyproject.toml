@@ -39,26 +39,17 @@ gunicorn = "^20.1.0"
 
 
 # added with poetry add -G dev package_name
+aenum = "^3.1.11"
+slugify = "^0.0.1"
+stringcase = "^1.2.0"
+aws-cdk-lib = "^2.47.0"
 [tool.poetry.group.dev.dependencies]
 pre-commit = "^2.20.0"
 black = "^22.8.0"
-aws-cdk-aws-autoscaling = "^1.140.0"
-aws-cdk-aws-certificatemanager = "^1.140.0"
-aws-cdk-aws-cloudwatch-actions = "^1.140.0"
-aws-cdk-aws-ec2 = "^1.140.0"
-aws-cdk-aws-ecs = "^1.140.0"
-aws-cdk-aws-ecs-patterns = "^1.140.0"
-aws-cdk-aws-elasticloadbalancingv2 = "^1.140.0"
-aws-cdk-aws-elasticloadbalancingv2-targets = "^1.140.0"
-aws-cdk-aws-iam = "^1.140.0"
-aws-cdk-aws-logs = "^1.140.0"
-aws-cdk-aws-rds = "^1.140.0"
-aws-cdk-aws-route53 = "^1.140.0"
-aws-cdk-aws-ssm = "^1.140.0"
-aws-cdk-core = "^1.140.0"
-
-
-
+jupyterlab = "^3.5.0"
+unicode = "^2.9"
+python-slugify = "^5.0.0"
+stringcase = "^1.2.0"
 
 
 [tool.black]
