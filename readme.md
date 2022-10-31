@@ -68,7 +68,7 @@ docker run -p 8094:8094  dashapp_skeleton:latest
 
 In a new folder called infra run:
 ```
-cdk init sample-app --language python 
+cdk init sample-app --language python
 ```
 The `cdk.json` file tells the CDK Toolkit how to execute your app.
 

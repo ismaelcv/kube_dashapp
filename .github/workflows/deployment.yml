@@ -14,7 +14,7 @@ on:
 env:
   ECR_REGISTRY: 501280619881.dkr.ecr.eu-central-1.amazonaws.com
   ECR_REPOSITORY: dashapp_skeleton_repo
-  SERVICE_NAME: dashapp_skeleton
+  SERVICE_NAME: dashapp-skeleton-service
   DEPLOYMENT_ROLE_DEVELOPMENT : deployment-role-dev
 
 jobs:
@@ -68,18 +68,18 @@ jobs:
 
       - name: Download task definition
         run: |
-          aws ecs describe-task-definition --task-definition ${{ env.SERVICE_NAME }} --query taskDefinition > task-definition-${{ env.CI_ENVIRONMENT_NAME }}.json
+          aws ecs describe-task-definition --task-definition ${{ env.SERVICE_NAME }} --query taskDefinition > task-definition.json
 
       # - name: Patch the awslogs-stream-prefix with image tag
       #   run: |
-      #     jq ".containerDefinitions[].logConfiguration.options[\"awslogs-stream-prefix\"] = \"${{ steps.set-image-tag.outputs.image-tag }}\"" task-definition-${{ env.CI_ENVIRONMENT_NAME }}.json > task-definition-${{ env.CI_ENVIRONMENT_NAME }}-patched.json
+      #     jq ".containerDefinitions[].logConfiguration.options[\"awslogs-stream-prefix\"] = \"${{ steps.set-image-tag.outputs.image-tag }}\"" task-definition.json > task-definition-patched.json
       #   shell: bash
 
       # - name: Fill in the new image tag in the Amazon ECS task definition
       #   id: task-def
       #   uses: aws-actions/amazon-ecs-render-task-definition@v1
       #   with:
-      #     task-definition: task-definition-${{ env.CI_ENVIRONMENT_NAME }}-patched.json
+      #     task-definition: task-definition-patched.json
       #     container-name: ${{ env.SERVICE_NAME }}-container
       #     image: ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:${{ steps.set-image-tag.outputs.image-tag }}
 
