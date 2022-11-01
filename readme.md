@@ -91,3 +91,61 @@ cdk bootstraap
 cdk deploy
 cdk destroy
 ```
+
+Steps to create a running EC2 instance
+
+ECR - Create a new repository
+	- Private 
+	- name: manual-private-dashapp-repo
+
+Push Docker image to ECR
+    - Follow Push commands for manual-private-dashapp-repo
+    - Or use CI/CD pipeline
+
+ECS Create new cluster
+    - Chose EC2 Linux + Networking
+    - Name: manual-private-cluster
+    - Instance type: t2.micro
+    - Number of Instances 1
+    - VPC: Select default vpc (AWS allocated)
+    - Subnet: Select default subnet
+    - Auto assign public IP : Enabled
+    - Security Group: Select default SG (AWS allocated)
+    - Container instance IAM role: ecsInstanceRole
+
+
+Create a IAM Role for task definition
+    - Select Elastic container service
+    - Select Elastic container service task
+    - Select AmazonS3FillAccess
+    - Select AmazonECSTaskExecutionRolePolicy
+    - Name: ManualPrivateDashappRole
+
+
+Create a Task Definition in ECS > Task Definitions
+    - Select EC2 instance
+    - Name: manualDashappTaskDefinition
+    - TaskRole: Select ManualPrivateDashappRole
+    - Task memory (MiB) : 100
+    - Task CPU (unit) : 1 vCPU
+    - Add Container
+        * Container Name: ManualPrivateDashappContainer
+        * Image: Copy image URI from repo
+        * Host Port 8094 
+        * Container port 8094 
+
+
+Port Map Inbound Rules EC2 > Instances > Security > Security group
+    - Edit Inbound Rules
+    - Delete Custom TCPs if not relevant
+    - Add Custom TCP 8094 Custom 0.0.0.0/0
+    - Add Custom TCP 8094 Custom ::/0
+
+
+Run the Task Definition ECS > Cluster > manual-private-cluster > Tasks 
+    - Select EC2
+    - Select manualDashappTaskDefinition as task definition
+
+Access Instance in EC2 > Intances > Instance ID 
+    - Copy Public IPv4 DNS and add the port at the end
+    - ec2-18-194-226-208.eu-central-1.compute.amazonaws.com:8094
