@@ -108,10 +108,10 @@ ECS Create new cluster
     - Instance type: t2.micro
     - Number of Instances 1
     - VPC: Select default vpc (AWS allocated)
-    - Subnet: Select default subnet
-    - Auto assign public IP : Enabled
-    - Security Group: Select default SG (AWS allocated)
-    - Container instance IAM role: ecsInstanceRole
+    - Subnet: Select default subnet !!!!!!!!!!!!!!(TODO)
+    - Auto assign public IP : Enabled  !!!!!!!!!!
+    - Security Group: Select default SG (AWS allocated) !!! Maybe add to the ApplicationLoadBalancedEc2Service
+    - Container instance IAM role: ecsInstanceRole !!!!!!!
 
 
 Create a IAM Role for task definition
