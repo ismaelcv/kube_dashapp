@@ -14,7 +14,7 @@ on:
 env:
   ECR_REGISTRY: 501280619881.dkr.ecr.eu-central-1.amazonaws.com
   ECR_REPOSITORY: dashapp-skeleton-repo
-  SERVICE_NAME: dashapp-skeleton-service
+  TASK_DEFINITION_NAME: dashapp-skeleton-task
   DEPLOYMENT_ROLE_DEVELOPMENT : deployment-role-dev
 
 jobs:
@@ -68,7 +68,7 @@ jobs:
 
       - name: Download task definition
         run: |
-          aws ecs describe-task-definition --task-definition ${{ env.SERVICE_NAME }} --query taskDefinition > task-definition.json
+          aws ecs describe-task-definition --task-definition ${{ env.TASK_DEFINITION_NAME }} --query taskDefinition > task-definition.json
 
       # - name: Patch the awslogs-stream-prefix with image tag
       #   run: |

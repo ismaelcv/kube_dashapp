@@ -1,7 +1,26 @@
+"""
+
+        # # Retrieve hosted zone for domain
+        # zone = route53.PublicHostedZone.from_lookup(self, "HostedZone", domain_name=self.zone_name)
+
+        # # Retrieve certificate for the domain that is used
+        # certificate_arn = Fn.import_value(exported_name_for_output(self.zone_name, "certificate", "arn"))
+        # certificate = cm.Certificate.from_certificate_arn(self, "GetCertificate", certificate_arn)
+
+
+
+        # tag_resource(self.deployment, Environment.tag_name, value=self.environment.value)
+        # tag_resource(self.deployment, EnvironmentTier.tag_name, value=self.environment_tier.value)
+
+        self.deployment.target_group.configure_health_check(path=health_check)
+
+"""
+
 from aws_cdk import App, Environment, Stack
 from aws_cdk import aws_ec2 as ec2
 from aws_cdk import aws_ecr as ecr
 from aws_cdk import aws_ecs as ecs
+from aws_cdk import aws_ecs_patterns as ecs_patterns
 from aws_cdk import aws_iam as iam
 from constructs import Construct
 
@@ -90,66 +109,24 @@ class ECSAppDeploymentStack(Stack):
             cpu=0,
         )
 
-        ecs.Ec2Service(self, "Service", cluster=cluster, task_definition=task_definition)
+        # ecs.Ec2Service(self, "Service", cluster=cluster, task_definition=task_definition)
 
-
-"""
-
-
-
-
-        # # Retrieve hosted zone for domain
-        # zone = route53.PublicHostedZone.from_lookup(self, "HostedZone", domain_name=self.zone_name)
-
-        # # Retrieve certificate for the domain that is used
-        # certificate_arn = Fn.import_value(exported_name_for_output(self.zone_name, "certificate", "arn"))
-        # certificate = cm.Certificate.from_certificate_arn(self, "GetCertificate", certificate_arn)
-
-
-
-        self.deployment = ecs_pat.ApplicationLoadBalancedEc2Service(
+        ecs_patterns.ApplicationLoadBalancedEc2Service(
             self,
             "ECSServiceDeployment",
             cluster=cluster,
-            memory_reservation_mib=memory_reservation_mib,
-            memory_limit_mib=memory_limit_mib,
-            cpu=cpu,
+            memory_reservation_mib=2048,
+            # memory_limit_mib=memory_limit_mib,
+            cpu=256,
             task_definition=task_definition,
-            service_name=f"{app_name}-service",
+            service_name="DashappDeploymentService",
             # certificate=certificate,
             # domain_name=self.full_domain,
             # domain_zone=zone,
-            desired_count=desired_count,
+            desired_count=2,
             # redirect_http=True,
-            cloud_map_options=cloud_map_options,
+            # cloud_map_options=cloud_map_options,
         )
-
-
-        # tag_resource(self.deployment, Environment.tag_name, value=self.environment.value)
-        # tag_resource(self.deployment, EnvironmentTier.tag_name, value=self.environment_tier.value)
-
-        self.deployment.target_group.configure_health_check(path=health_check)
-
-        deployment = ecs_pat.ApplicationLoadBalancedEc2Service(
-            self,
-            "ECSServiceDeployment",
-            cluster=cluster,
-            memory_reservation_mib=memory_reservation_mib,
-            memory_limit_mib=memory_limit_mib,
-            cpu=cpu,
-            task_definition=task_definition,
-            service_name=f"{app_name}-service",
-            # certificate=certificate,
-            # domain_name=self.full_domain,
-            # domain_zone=zone,
-            desired_count=desired_count,
-            # redirect_http=True,
-            cloud_map_options=cloud_map_options,
-        )
-
-
-
-"""
 
 
 app = App()

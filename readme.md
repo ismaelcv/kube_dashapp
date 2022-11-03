@@ -95,7 +95,7 @@ cdk destroy
 Steps to create a running EC2 instance
 
 ECR - Create a new repository
-	- Private 
+	- Private
 	- name: manual-private-dashapp-repo
 
 Push Docker image to ECR
@@ -131,8 +131,8 @@ Create a Task Definition in ECS > Task Definitions
     - Add Container
         * Container Name: ManualPrivateDashappContainer
         * Image: Copy image URI from repo
-        * Host Port 8094 
-        * Container port 8094 
+        * Host Port 8094
+        * Container port 8094
 
 
 Port Map Inbound Rules EC2 > Instances > Security > Security group
@@ -142,10 +142,10 @@ Port Map Inbound Rules EC2 > Instances > Security > Security group
     - Add Custom TCP 8094 Custom ::/0
 
 
-Run the Task Definition ECS > Cluster > manual-private-cluster > Tasks 
+Run the Task Definition ECS > Cluster > manual-private-cluster > Tasks
     - Select EC2
     - Select manualDashappTaskDefinition as task definition
 
-Access Instance in EC2 > Intances > Instance ID 
+Access Instance in EC2 > Intances > Instance ID
     - Copy Public IPv4 DNS and add the port at the end
     - ec2-18-194-226-208.eu-central-1.compute.amazonaws.com:8094
