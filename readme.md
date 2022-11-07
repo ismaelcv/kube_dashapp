@@ -149,3 +149,62 @@ Run the Task Definition ECS > Cluster > manual-private-cluster > Tasks
 Access Instance in EC2 > Intances > Instance ID
     - Copy Public IPv4 DNS and add the port at the end
     - ec2-18-194-226-208.eu-central-1.compute.amazonaws.com:8094
+
+
+    Create a cluster
+    - Select Networking only
+    - give it a name 
+    - do not select create a vpc
+    - create
+
+    Create a Task Definition
+    - Select fargate task definition
+    - Give it a name
+    - Select standard execution role
+    - Operating system is linux
+    - Select the smallest memory (1GB) and 0.5 Vcpu
+    - Attach a container
+        - Select container name
+        - Paste uri of the image we are adding + :latest
+        - Port mapping 8094 in tcp
+
+    Create a Service in the cluster
+    - Create a new service
+    - Select fargate service
+    - add a service name
+    - number of tasks :1 
+    - next step
+    - Select the default vpc and all subnets in the vpc
+    - Security groups edit
+        - Create a new security group
+        - Give it a name
+        - Custom TCP 3001 Anywhere
+    - Select aplication load balancer
+    - Set health check grace period to 30
+    - Create a Load Balancer in EC2 > Load Balancers
+        - Select application load balancer
+        - give it a name
+        - Internet facing and IPv4
+        - Select all subnets inside the vpc
+        - Create a new security group
+            - Give it a name
+            - Description: allows traffic in port 80
+            - add name
+            - Custom TCP, port 80 Source anywhere
+        - Select the create security group
+        - Create a new target group
+            - Select Ip addresses
+            - Give the name to the target group
+            - add health/ as check path
+    - Select container to load balance
+        - Select 80 to production listerner port
+        - Select the target group that we created into the target group name
+    - next step and then next step and then create service
+    - We can check the DNS name on EC2 > Load balancers
+
+
+
+
+
+
+
