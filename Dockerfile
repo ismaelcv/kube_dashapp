@@ -9,8 +9,6 @@ ENV YOUR_ENV=${MLFLOW_ENV} \
     APP_DIR="/code" \
     POETRY_VERSION=1.2.2
 
-
-
 # System deps:
 RUN pip install "poetry==$POETRY_VERSION"
 

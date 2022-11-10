@@ -1,5 +1,6 @@
-# TODO: Add connection to s3
 # TODO: Make sure CI/CD pipeline works
+# TODO: Hide var names on env variables
+# TODO : document
 
 
 from aws_cdk import App, Duration, Environment, Stack
@@ -59,16 +60,19 @@ class ECSAppDeploymentStack(Stack):
             assumed_by=iam.ServicePrincipal("ecs-tasks.amazonaws.com"),
             managed_policies=[
                 iam.ManagedPolicy.from_aws_managed_policy_name("service-role/AmazonECSTaskExecutionRolePolicy"),
-                iam.PolicyStatement(
-                    sid="AllowWriteByCiCdPolicy",
-                    actions=["s3:GetObject*", "s3:GetBucket*", "s3:List*"],
-                    resources=[
-                        "arn:aws:s3:::lambda-github-actions-test-bucket",
-                        "arn:aws:s3:::lambda-github-actions-test-bucket/*",
-                    ],
-                    effect=iam.Effect.ALLOW,
-                ),
             ],
+        )
+
+        task_role.add_to_policy(
+            iam.PolicyStatement(
+                sid="AllowWriteByCiCdPolicy",
+                actions=["s3:GetObject*", "s3:GetBucket*", "s3:List*"],
+                resources=[
+                    "arn:aws:s3:::lambda-github-actions-test-bucket",
+                    "arn:aws:s3:::lambda-github-actions-test-bucket/*",
+                ],
+                effect=iam.Effect.ALLOW,
+            ),
         )
 
         image = ecs.ContainerImage.from_ecr_repository(repo)
