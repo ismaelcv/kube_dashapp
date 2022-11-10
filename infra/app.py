@@ -1,26 +1,11 @@
-"""
+# TODO: Add connection to s3
+# TODO: Make sure CI/CD pipeline works
 
-        # # Retrieve hosted zone for domain
-        # zone = route53.PublicHostedZone.from_lookup(self, "HostedZone", domain_name=self.zone_name)
-
-        # # Retrieve certificate for the domain that is used
-        # certificate_arn = Fn.import_value(exported_name_for_output(self.zone_name, "certificate", "arn"))
-        # certificate = cm.Certificate.from_certificate_arn(self, "GetCertificate", certificate_arn)
-
-
-
-        # tag_resource(self.deployment, Environment.tag_name, value=self.environment.value)
-        # tag_resource(self.deployment, EnvironmentTier.tag_name, value=self.environment_tier.value)
-
-        self.deployment.target_group.configure_health_check(path=health_check)
-
-"""
 
 from aws_cdk import App, Duration, Environment, Stack
 from aws_cdk import aws_ec2 as ec2
 from aws_cdk import aws_ecr as ecr
 from aws_cdk import aws_ecs as ecs
-from aws_cdk import aws_ecs_patterns as ecs_patterns
 from aws_cdk import aws_elasticloadbalancingv2 as elb
 from aws_cdk import aws_iam as iam
 from constructs import Construct
@@ -29,6 +14,7 @@ ECR_REPO_NAME = "cdk-dashapp-repo"
 SECURITY_GROUP_ID = "sg-0991712be7fe6dde3"
 ENVIRONMENT = Environment(account="501280619881", region="eu-central-1")
 CONTAINER_PORT = 8094
+CONTAINER_NAME = "Cdk-container"
 
 
 class CreateRepoStack(Stack):
@@ -97,28 +83,22 @@ class ECSAppDeploymentStack(Stack):
         task_definition.add_container(
             id="Add Containter to task defintion",
             image=image,
-            container_name="Cdk-container",
+            container_name=CONTAINER_NAME,
             port_mappings=[ecs.PortMapping(container_port=CONTAINER_PORT)],
             memory_reservation_mib=128,
             cpu=0,
         )
 
-        security_group_lb = ec2.SecurityGroup(
-            self, "create security group", vpc=vpc, allow_all_outbound=True, security_group_name="load_balancer"
-        )
-        security_group_lb.add_ingress_rule(peer=ec2.Peer.any_ipv4(), connection=ec2.Port.tcp(CONTAINER_PORT))
-        security_group_lb.add_ingress_rule(peer=ec2.Peer.any_ipv6(), connection=ec2.Port.tcp(CONTAINER_PORT))
-        security_group_lb.add_ingress_rule(peer=ec2.Peer.any_ipv4(), connection=ec2.Port.tcp(80))
-
-        target_group = elb.ApplicationTargetGroup(
+        load_balancer_sg = ec2.SecurityGroup(
             self,
-            "create target_group",
-            target_group_name="tg-dashapp-cdk",
+            "create load balancersecurity group",
             vpc=vpc,
-            health_check={"path": "/health"},
-            port=80,
-            target_type=elb.TargetType.IP,
+            allow_all_outbound=True,
+            security_group_name="load_balancer",
         )
+        load_balancer_sg.add_ingress_rule(peer=ec2.Peer.any_ipv4(), connection=ec2.Port.tcp(CONTAINER_PORT))
+        load_balancer_sg.add_ingress_rule(peer=ec2.Peer.any_ipv6(), connection=ec2.Port.tcp(CONTAINER_PORT))
+        load_balancer_sg.add_ingress_rule(peer=ec2.Peer.any_ipv4(), connection=ec2.Port.tcp(80))
 
         load_balancer = elb.ApplicationLoadBalancer(
             self,
@@ -126,47 +106,46 @@ class ECSAppDeploymentStack(Stack):
             load_balancer_name="cdk-load-balancer",
             vpc=vpc,
             internet_facing=True,
-            security_group=security_group_lb,
+            security_group=load_balancer_sg,
         )
 
         listener = elb.ApplicationListener(
             self,
             "Create listener",
-            default_target_groups=[target_group],
             load_balancer=load_balancer,
             port=80,
         )
 
-        # lb = elbv2.ApplicationLoadBalancer(self, "LB", vpc=vpc, internet_facing=True)
-        # listener = load_balancer.add_listener("Listener", port=80)
-        # service.register_load_balancer_targets(
-        #     container_name="web",
-        #     container_port=80,
-        #     new_target_group_id="ECS",
-        #     listener=ecs.ListenerConfig.application_listener(listener,
-        #         protocol=elbv2.ApplicationProtocol.HTTPS
-        #     )
-        # )
-
-        service = ecs.FargateService(
+        fargate_sg = ec2.SecurityGroup(
             self,
-            "Farghate Service Deployment",
+            "create fargate security group",
+            vpc=vpc,
+            allow_all_outbound=True,
+            security_group_name="fargate_service",
+        )
+        fargate_sg.add_ingress_rule(peer=ec2.Peer.any_ipv4(), connection=ec2.Port.tcp(CONTAINER_PORT))
+        fargate_sg.add_ingress_rule(peer=ec2.Peer.any_ipv6(), connection=ec2.Port.tcp(CONTAINER_PORT))
+
+        ecs.FargateService(
+            self,
+            "Fargate Service Deployment",
             cluster=cluster,
             task_definition=task_definition,
             service_name="cdkDashappFargateService",
-            # certificate=certificate,
-            # domain_name=self.full_domain,
-            # domain_zone=zone,
-            # redirect_http=True,
-            # cloud_map_options=cloud_map_options,
+            assign_public_ip=True,
+            security_groups=[fargate_sg],
             health_check_grace_period=Duration.seconds(30),
         ).register_load_balancer_targets(
             ecs.EcsTarget(
-                container_name="Cdk-container",
+                container_name=CONTAINER_NAME,
                 container_port=CONTAINER_PORT,
                 new_target_group_id="ECS",
-                listener=ecs.ListenerConfig.application_listener(listener, protocol=elb.ApplicationProtocol.HTTPS),
-            )
+                listener=ecs.ListenerConfig.application_listener(
+                    listener,
+                    protocol=elb.ApplicationProtocol.HTTP,
+                    health_check={"path": "/health"},
+                ),
+            ),
         )
 
 

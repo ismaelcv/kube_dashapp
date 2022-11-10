@@ -153,7 +153,7 @@ Access Instance in EC2 > Intances > Instance ID
 
     Create a cluster
     - Select Networking only
-    - give it a name 
+    - give it a name
     - do not select create a vpc
     - create
 
@@ -172,7 +172,7 @@ Access Instance in EC2 > Intances > Instance ID
     - Create a new service
     - Select fargate service
     - add a service name
-    - number of tasks :1 
+    - number of tasks :1
     - next step
     - Select the default vpc and all subnets in the vpc
     - Security groups edit
@@ -201,10 +201,3 @@ Access Instance in EC2 > Intances > Instance ID
         - Select the target group that we created into the target group name
     - next step and then next step and then create service
     - We can check the DNS name on EC2 > Load balancers
-
-
-
-
-
-
-
