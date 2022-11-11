@@ -29,6 +29,17 @@ jobs:
           virtualenvs-in-project: true
           installer-parallel: true
 
+      # This is only needed when there are AWS resorces on pytest
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-central-1
+          role-to-assume: ${{ secrets.DEPLOYMENT_ROLE_DEVELOPMENT }}
+          role-skip-session-tagging: true
+          role-duration-seconds: 3600
+
       - name: Install dependencies
         run: |
             pip install pylint==2.15.2
