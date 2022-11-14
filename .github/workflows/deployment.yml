@@ -5,7 +5,7 @@ on:
     branches:
       - main
     paths:
-      - "drydown_app/**"
+      - "dashapp_skeleton/**"
       - "poetry.lock"
       - "Dockerfile"
       - ".github/workflows/deployment.yml"
