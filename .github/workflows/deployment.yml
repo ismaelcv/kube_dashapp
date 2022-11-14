@@ -57,7 +57,7 @@ jobs:
 
       - name: Download task definition
         run: |
-          aws ecs describe-task-definition --task-definition ${{ env.TASK_DEFINITION_NAME }}_taskdefinition --query taskDefinition > task-definition.json
+          aws ecs describe-task-definition --task-definition ${{ env.CDK_STACK_PREFIX }}_taskdefinition --query taskDefinition > task-definition.json
 
       - name: Patch the awslogs-stream-prefix with image tag
         run: |
