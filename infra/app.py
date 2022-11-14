@@ -1,23 +1,15 @@
-# TODO: Hide var names on env variables
 # TODO: create deplyment role in stack
 # TODO : document
 
 
-from aws_cdk import (
-    App,
-    Duration,
-    Environment,
-    Stack,
-    aws_ec2 as ec2,
-    aws_ecr as ecr,
-    aws_ecs as ecs,
-    aws_elasticloadbalancingv2 as elb,
-    aws_iam as iam,
-    aws_logs as logs,
-)
-
+from aws_cdk import App, Duration, Environment, Stack
+from aws_cdk import aws_ec2 as ec2
+from aws_cdk import aws_ecr as ecr
+from aws_cdk import aws_ecs as ecs
+from aws_cdk import aws_elasticloadbalancingv2 as elb
+from aws_cdk import aws_iam as iam
+from aws_cdk import aws_logs as logs
 from constructs import Construct
-
 
 SECURITY_GROUP_ID = "sg-0991712be7fe6dde3"
 ENVIRONMENT = Environment(account="501280619881", region="eu-central-1")
@@ -81,7 +73,7 @@ class ECSAppDeploymentStack(Stack):
         task_role = iam.Role(
             self,
             "Create task definition role",
-            role_name="dashapptaskDefinitionRole",
+            role_name=f"{STACK_PREFIX}_taskdefrole",
             assumed_by=iam.ServicePrincipal("ecs-tasks.amazonaws.com"),
             managed_policies=[
                 iam.ManagedPolicy.from_aws_managed_policy_name("service-role/AmazonECSTaskExecutionRolePolicy"),

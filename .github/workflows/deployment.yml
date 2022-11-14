@@ -12,9 +12,8 @@ on:
   workflow_dispatch:
 
 env:
-  ECR_REGISTRY: 501280619881.dkr.ecr.eu-central-1.amazonaws.com
-  CDK_STACK_PREFIX: cdkdashapp
-  DEPLOYMENT_ROLE_DEVELOPMENT : deployment-role-dev
+  ECR_REGISTRY_ARN: ${{ secrets.ECR_REGISTRY_ARN }}   # format: <USER_ID>.dkr.ecr.<REGION>.amazonaws.com
+  STACK_PREFIX:  ${{ secrets.ECR_REGISTRY_ARN}}       # format: str, prefix stack name coming from cdk
 
 jobs:
   build-push-deploy:
@@ -31,7 +30,7 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: eu-central-1
-          role-to-assume:  ${{ env.DEPLOYMENT_ROLE_DEVELOPMENT }}
+          role-to-assume:  ${{ env.STACK_PREFIX }}_deploymentrole
           role-skip-session-tagging: true
           role-duration-seconds: 3600
 
@@ -50,14 +49,14 @@ jobs:
           context: .
           platforms: linux/amd64
           tags: |
-            ${{ env.ECR_REGISTRY }}/${{ env.CDK_STACK_PREFIX }}_repo:${{ steps.set-image-tag.outputs.image-tag }}
+            ${{ env.ECR_REGISTRY_ARN }}/${{ env.STACK_PREFIX }}_repo:${{ steps.set-image-tag.outputs.image-tag }}
           push: true
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
       - name: Download task definition
         run: |
-          aws ecs describe-task-definition --task-definition ${{ env.CDK_STACK_PREFIX }}_taskdefinition --query taskDefinition > task-definition.json
+          aws ecs describe-task-definition --task-definition ${{ env.STACK_PREFIX }}_taskdefinition --query taskDefinition > task-definition.json
 
       - name: Patch the awslogs-stream-prefix with image tag
         run: |
@@ -69,13 +68,13 @@ jobs:
         uses: aws-actions/amazon-ecs-render-task-definition@v1
         with:
           task-definition: task-definition-patched.json
-          container-name: ${{ env.CDK_STACK_PREFIX }}_container
-          image: ${{ env.ECR_REGISTRY }}/${{ env.CDK_STACK_PREFIX }}_repo:${{ steps.set-image-tag.outputs.image-tag }}
+          container-name: ${{ env.STACK_PREFIX }}_container
+          image: ${{ env.ECR_REGISTRY }}/${{ env.STACK_PREFIX }}_repo:${{ steps.set-image-tag.outputs.image-tag }}
 
       - name: Run Task on Amazon ECS
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
         with:
           task-definition: ${{ steps.task-def.outputs.task-definition }}
-          cluster: ${{ env.CDK_STACK_PREFIX }}_cluster
-          service: ${{ env.CDK_STACK_PREFIX }}_service
+          cluster: ${{ env.STACK_PREFIX }}_cluster
+          service: ${{ env.STACK_PREFIX }}_service
           wait-for-service-stability: true
