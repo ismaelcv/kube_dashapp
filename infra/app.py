@@ -1,5 +1,6 @@
 # TODO: Make sure CI/CD pipeline works
 # TODO: Hide var names on env variables
+# TODO: create deplyment role in stack
 # TODO : document
 
 
@@ -11,11 +12,11 @@ from aws_cdk import aws_elasticloadbalancingv2 as elb
 from aws_cdk import aws_iam as iam
 from constructs import Construct
 
-ECR_REPO_NAME = "cdk-dashapp-repo"
 SECURITY_GROUP_ID = "sg-0991712be7fe6dde3"
 ENVIRONMENT = Environment(account="501280619881", region="eu-central-1")
 CONTAINER_PORT = 8094
-CONTAINER_NAME = "Cdk-container"
+
+STACK_PREFIX = "cdkdashapp"
 
 
 class CreateRepoStack(Stack):
@@ -31,7 +32,7 @@ class CreateRepoStack(Stack):
             self,
             id="Create Repository",
             image_tag_mutability=ecr.TagMutability.MUTABLE,
-            repository_name=ECR_REPO_NAME,
+            repository_name=f"{STACK_PREFIX}_repo",
         )
 
 
@@ -48,15 +49,15 @@ class ECSAppDeploymentStack(Stack):
             env=ENVIRONMENT,
         )
 
-        repo = ecr.Repository.from_repository_name(self, id="repo_lookup", repository_name=ECR_REPO_NAME)
+        repo = ecr.Repository.from_repository_name(self, id="repo_lookup", repository_name=f"{STACK_PREFIX}_repo")
         vpc = ec2.Vpc.from_lookup(self, "VPC", is_default=True)
 
-        cluster = ecs.Cluster(self, id="Create Cluster", vpc=vpc, cluster_name="fargate_cdk_cluster")
+        cluster = ecs.Cluster(self, id="Create Cluster", vpc=vpc, cluster_name=f"{STACK_PREFIX}_cluster")
 
         task_role = iam.Role(
             self,
             "Create task definition role",
-            role_name="DashAppTaskDefinitionEcsRole",
+            role_name="dashapptaskDefinitionRole",
             assumed_by=iam.ServicePrincipal("ecs-tasks.amazonaws.com"),
             managed_policies=[
                 iam.ManagedPolicy.from_aws_managed_policy_name("service-role/AmazonECSTaskExecutionRolePolicy"),
@@ -80,14 +81,14 @@ class ECSAppDeploymentStack(Stack):
         task_definition = ecs.FargateTaskDefinition(
             self,
             id="Add task defnition",
-            family="cdk-task-definition_fargate",
+            family=f"{STACK_PREFIX}_taskdefinition",
             task_role=task_role,
             execution_role=task_role,
         )
         task_definition.add_container(
             id="Add Containter to task defintion",
             image=image,
-            container_name=CONTAINER_NAME,
+            container_name=f"{STACK_PREFIX}_container",
             port_mappings=[ecs.PortMapping(container_port=CONTAINER_PORT)],
             memory_reservation_mib=128,
             cpu=0,
@@ -107,7 +108,7 @@ class ECSAppDeploymentStack(Stack):
         load_balancer = elb.ApplicationLoadBalancer(
             self,
             "Create Load Balancer",
-            load_balancer_name="cdk-load-balancer",
+            load_balancer_name="dashapploadbalancer",
             vpc=vpc,
             internet_facing=True,
             security_group=load_balancer_sg,
@@ -135,13 +136,13 @@ class ECSAppDeploymentStack(Stack):
             "Fargate Service Deployment",
             cluster=cluster,
             task_definition=task_definition,
-            service_name="cdkDashappFargateService",
+            service_name=f"{STACK_PREFIX}_service",
             assign_public_ip=True,
             security_groups=[fargate_sg],
             health_check_grace_period=Duration.seconds(30),
         ).register_load_balancer_targets(
             ecs.EcsTarget(
-                container_name=CONTAINER_NAME,
+                container_name=f"{STACK_PREFIX}_container",
                 container_port=CONTAINER_PORT,
                 new_target_group_id="ECS",
                 listener=ecs.ListenerConfig.application_listener(
