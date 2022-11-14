@@ -1,16 +1,23 @@
-# TODO: Make sure CI/CD pipeline works
 # TODO: Hide var names on env variables
 # TODO: create deplyment role in stack
 # TODO : document
 
 
-from aws_cdk import App, Duration, Environment, Stack
-from aws_cdk import aws_ec2 as ec2
-from aws_cdk import aws_ecr as ecr
-from aws_cdk import aws_ecs as ecs
-from aws_cdk import aws_elasticloadbalancingv2 as elb
-from aws_cdk import aws_iam as iam
+from aws_cdk import (
+    App,
+    Duration,
+    Environment,
+    Stack,
+    aws_ec2 as ec2,
+    aws_ecr as ecr,
+    aws_ecs as ecs,
+    aws_elasticloadbalancingv2 as elb,
+    aws_iam as iam,
+    aws_logs as logs,
+)
+
 from constructs import Construct
+
 
 SECURITY_GROUP_ID = "sg-0991712be7fe6dde3"
 ENVIRONMENT = Environment(account="501280619881", region="eu-central-1")
@@ -33,6 +40,23 @@ class CreateRepoStack(Stack):
             id="Create Repository",
             image_tag_mutability=ecr.TagMutability.MUTABLE,
             repository_name=f"{STACK_PREFIX}_repo",
+        )
+
+
+class CreateLogsStack(Stack):
+    """
+    This Stack creates the following infra:
+    - ECR Repo
+    """
+
+    def __init__(self, scope: Construct, stack_id: str, **kwargs):
+        super().__init__(scope, stack_id, **kwargs)
+
+        logs.LogGroup(
+            self,
+            "AppLogGroup",
+            log_group_name=STACK_PREFIX,
+            retention=logs.RetentionDays.ONE_WEEK,
         )
 
 
@@ -77,6 +101,8 @@ class ECSAppDeploymentStack(Stack):
         )
 
         image = ecs.ContainerImage.from_ecr_repository(repo)
+        log_group = logs.LogGroup.from_log_group_name(self, id="get log group", log_group_name=STACK_PREFIX)
+        log_driver = ecs.LogDrivers.aws_logs(log_group=log_group, stream_prefix=STACK_PREFIX)
 
         task_definition = ecs.FargateTaskDefinition(
             self,
@@ -92,6 +118,7 @@ class ECSAppDeploymentStack(Stack):
             port_mappings=[ecs.PortMapping(container_port=CONTAINER_PORT)],
             memory_reservation_mib=128,
             cpu=0,
+            logging=log_driver,
         )
 
         load_balancer_sg = ec2.SecurityGroup(
@@ -156,6 +183,7 @@ class ECSAppDeploymentStack(Stack):
 
 app = App()
 CreateRepoStack(app, stack_id="CreateRepoStack")
+CreateLogsStack(app, stack_id="CreateLogsStack")
 ECSAppDeploymentStack(app, stack_id="dashappSkeletonECSDeploymentStack")
 
 app.synth()
