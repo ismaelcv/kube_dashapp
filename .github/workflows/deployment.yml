@@ -13,10 +13,8 @@ on:
 
 env:
   ECR_REGISTRY: 501280619881.dkr.ecr.eu-central-1.amazonaws.com
-  ECR_REPOSITORY: cdk-dashapp-repo
-  TASK_DEFINITION_NAME: cdk-task-definition_fargate
+  CDK_STACK_PREFIX: cdkdashapp
   DEPLOYMENT_ROLE_DEVELOPMENT : deployment-role-dev
-  SERVICE_NAME : cdkDashappFargateService
 
 jobs:
   build-push-deploy:
@@ -52,14 +50,14 @@ jobs:
           context: .
           platforms: linux/amd64
           tags: |
-            ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:${{ steps.set-image-tag.outputs.image-tag }}
+            ${{ env.ECR_REGISTRY }}/${{ env.CDK_STACK_PREFIX }}_repo:${{ steps.set-image-tag.outputs.image-tag }}
           push: true
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
       - name: Download task definition
         run: |
-          aws ecs describe-task-definition --task-definition ${{ env.TASK_DEFINITION_NAME }} --query taskDefinition > task-definition.json
+          aws ecs describe-task-definition --task-definition ${{ env.TASK_DEFINITION_NAME }}_taskdefinition --query taskDefinition > task-definition.json
 
       - name: Patch the awslogs-stream-prefix with image tag
         run: |
@@ -71,13 +69,13 @@ jobs:
         uses: aws-actions/amazon-ecs-render-task-definition@v1
         with:
           task-definition: task-definition-patched.json
-          container-name: ${{ env.SERVICE_NAME }}-container
-          image: ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:${{ steps.set-image-tag.outputs.image-tag }}
+          container-name: ${{ env.CDK_STACK_PREFIX }}_container
+          image: ${{ env.ECR_REGISTRY }}/${{ env.CDK_STACK_PREFIX }}_repo:${{ steps.set-image-tag.outputs.image-tag }}
 
       # - name: Run Task on Amazon ECS
       #   uses: aws-actions/amazon-ecs-deploy-task-definition@v1
       #   with:
       #     task-definition: ${{ steps.task-def.outputs.task-definition }}
-      #     cluster: ${{ env.CI_ENVIRONMENT_NAME }}-cluster
-      #     service: ${{ env.SERVICE_NAME }}
+      #     cluster: ${{ env.CDK_STACK_PREFIX }}_cluster
+      #     service: ${{ env.CDK_STACK_PREFIX }}_service
       #     wait-for-service-stability: true
