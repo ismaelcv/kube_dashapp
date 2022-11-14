@@ -59,10 +59,10 @@ jobs:
         run: |
           aws ecs describe-task-definition --task-definition ${{ env.CDK_STACK_PREFIX }}_taskdefinition --query taskDefinition > task-definition.json
 
-      - name: Patch the awslogs-stream-prefix with image tag
-        run: |
-          jq ".containerDefinitions[].logConfiguration.options[\"awslogs-stream-prefix\"] = \"${{ steps.set-image-tag.outputs.image-tag }}\"" task-definition.json > task-definition-patched.json
-        shell: bash
+      # - name: Patch the awslogs-stream-prefix with image tag
+      #   run: |
+      #     jq ".containerDefinitions[].logConfiguration.options[\"awslogs-stream-prefix\"] = \"${{ steps.set-image-tag.outputs.image-tag }}\"" task-definition.json > task-definition-patched.json
+      #   shell: bash
 
       - name: Fill in the new image tag in the Amazon ECS task definition
         id: task-def
