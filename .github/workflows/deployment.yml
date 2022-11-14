@@ -72,10 +72,10 @@ jobs:
           container-name: ${{ env.CDK_STACK_PREFIX }}_container
           image: ${{ env.ECR_REGISTRY }}/${{ env.CDK_STACK_PREFIX }}_repo:${{ steps.set-image-tag.outputs.image-tag }}
 
-      # - name: Run Task on Amazon ECS
-      #   uses: aws-actions/amazon-ecs-deploy-task-definition@v1
-      #   with:
-      #     task-definition: ${{ steps.task-def.outputs.task-definition }}
-      #     cluster: ${{ env.CDK_STACK_PREFIX }}_cluster
-      #     service: ${{ env.CDK_STACK_PREFIX }}_service
-      #     wait-for-service-stability: true
+      - name: Run Task on Amazon ECS
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+        with:
+          task-definition: ${{ steps.task-def.outputs.task-definition }}
+          cluster: ${{ env.CDK_STACK_PREFIX }}_cluster
+          service: ${{ env.CDK_STACK_PREFIX }}_service
+          wait-for-service-stability: true
