@@ -23,7 +23,7 @@ fig = go.Figure(data=go.Scatter(x=xs, y=ys))
 fig.update_layout(xaxis_title="Years", yaxis_title="$")
 app.layout = html.Div(
     children=[
-        html.H1(children=f"HOW many files are in {BUCKET_NAME}"),
+        html.H1(children=f"how many files are in {BUCKET_NAME}..lets check"),
         html.H2(children=f"There are {len(files)} files in your s3 bucket"),
         html.H3(children=str(files)),
         html.Br(),
