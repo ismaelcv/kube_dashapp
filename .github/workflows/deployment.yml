@@ -16,6 +16,7 @@ env:
   ECR_REPOSITORY: cdk-dashapp-repo
   TASK_DEFINITION_NAME: cdk-task-definition_fargate
   DEPLOYMENT_ROLE_DEVELOPMENT : deployment-role-dev
+  SERVICE_NAME : cdkDashappFargateService
 
 jobs:
   build-push-deploy:
@@ -56,16 +57,6 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      # - name: Configure AWS credentials
-      #   uses: aws-actions/configure-aws-credentials@v1
-      #   with:
-      #     aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      #     aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      #     aws-region: eu-central-1
-      #     role-to-assume: ${{ secrets.DEPLOYMENT_ROLE_DEVELOPMENT }}
-      #     role-skip-session-tagging: true
-      #     role-duration-seconds: 3600
-
       - name: Download task definition
         run: |
           aws ecs describe-task-definition --task-definition ${{ env.TASK_DEFINITION_NAME }} --query taskDefinition > task-definition.json
@@ -75,13 +66,13 @@ jobs:
           jq ".containerDefinitions[].logConfiguration.options[\"awslogs-stream-prefix\"] = \"${{ steps.set-image-tag.outputs.image-tag }}\"" task-definition.json > task-definition-patched.json
         shell: bash
 
-      # - name: Fill in the new image tag in the Amazon ECS task definition
-      #   id: task-def
-      #   uses: aws-actions/amazon-ecs-render-task-definition@v1
-      #   with:
-      #     task-definition: task-definition-patched.json
-      #     container-name: ${{ env.SERVICE_NAME }}-container
-      #     image: ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:${{ steps.set-image-tag.outputs.image-tag }}
+      - name: Fill in the new image tag in the Amazon ECS task definition
+        id: task-def
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: task-definition-patched.json
+          container-name: ${{ env.SERVICE_NAME }}-container
+          image: ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:${{ steps.set-image-tag.outputs.image-tag }}
 
       # - name: Run Task on Amazon ECS
       #   uses: aws-actions/amazon-ecs-deploy-task-definition@v1
