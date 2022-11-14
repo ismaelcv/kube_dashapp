@@ -13,7 +13,7 @@ on:
 
 env:
   ECR_REGISTRY_ARN: ${{ secrets.ECR_REGISTRY_ARN }}   # format: <USER_ID>.dkr.ecr.<REGION>.amazonaws.com
-  STACK_PREFIX:  ${{ secrets.ECR_REGISTRY_ARN}}       # format: str, prefix stack name coming from cdk
+  STACK_PREFIX:  ${{ secrets.STACK_PREFIX}}       # format: str, prefix stack name coming from cdk
 
 jobs:
   build-push-deploy:
@@ -30,14 +30,14 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: eu-central-1
-          role-to-assume:  cdkdashapp_deploymentrole
+          role-to-assume:  ${{ env.STACK_PREFIX }}_deploymentrole
           role-skip-session-tagging: true
           role-duration-seconds: 3600
 
       - name: Login to Amazon ECR
         id: login-ecr
         run: |
-          aws ecr get-login-password --region eu-central-1 | docker login --username AWS --password-stdin ${{ env.ECR_REGISTRY }}
+          aws ecr get-login-password --region eu-central-1 | docker login --username AWS --password-stdin ${{ env.ECR_REGISTRY_ARN }}
 
       - name: Set image tag
         id: set-image-tag
@@ -69,7 +69,7 @@ jobs:
         with:
           task-definition: task-definition-patched.json
           container-name: ${{ env.STACK_PREFIX }}_container
-          image: ${{ env.ECR_REGISTRY }}/${{ env.STACK_PREFIX }}_repo:${{ steps.set-image-tag.outputs.image-tag }}
+          image: ${{ env.ECR_REGISTRY_ARN }}/${{ env.STACK_PREFIX }}_repo:${{ steps.set-image-tag.outputs.image-tag }}
 
       - name: Run Task on Amazon ECS
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
