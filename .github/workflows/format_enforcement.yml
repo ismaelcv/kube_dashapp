@@ -6,6 +6,11 @@ on:
   push:
     branches:
       - main
+    paths:
+      - "drydown_app/**"
+      - "poetry.lock"
+      - "Dockerfile"
+      - ".github/workflows/format_enforcement.yml"
 
 jobs:
   ci:
