@@ -1,1 +1,4 @@
-# variable "vpc_id" {}
+variable "application_name" { 
+    type = string 
+    default = "dashapptf"
+    }

@@ -1,27 +1,27 @@
 locals {
-  application_name = "dashapptf"
   launch_type      = "FARGATE"
-  containerPort     = 8094
+  containerPort    = 8094
 }
 
 resource "aws_ecs_cluster" "this" {
-  name = "${local.application_name}_cluster"
+  name = "${var.application_name}_cluster"
 
 }
+
 
 
 resource "aws_ecs_task_definition" "this" {
 
   container_definitions = jsonencode([
     {
-      name      = "${local.application_name}_container"
-      image     = "501280619881.dkr.ecr.eu-central-1.amazonaws.com/cdk-dashapp-repo:latest"
+      name      = "${var.application_name}_container"
+      image     = "${data.aws_ecr_repository.this.repository_url}:latest"
       cpu       = 10
       memory    = 512
       essential = true
       portMappings = [
         {
-          containerPort = locals.containerPort
+          containerPort = local.containerPort
         }
       ]
     }
@@ -29,7 +29,7 @@ resource "aws_ecs_task_definition" "this" {
   )
   task_role_arn            = "arn:aws:iam::501280619881:role/ecsTaskExecutionRole"
   execution_role_arn       = "arn:aws:iam::501280619881:role/ecsTaskExecutionRole"
-  family                   = "${local.application_name}_taskdefinition"
+  family                   = "${var.application_name}_taskdefinition"
   requires_compatibilities = [local.launch_type]
 
   cpu          = "256"
@@ -39,7 +39,7 @@ resource "aws_ecs_task_definition" "this" {
 }
 
 resource "aws_ecs_service" "this" {
-  name        = "${local.application_name}_service"
+  name        = "${var.application_name}_service"
   cluster     = aws_ecs_cluster.this.arn
   launch_type = local.launch_type
 
@@ -52,7 +52,7 @@ resource "aws_ecs_service" "this" {
 
     assign_public_ip = true
     security_groups  = data.aws_security_groups.this.ids
-    subnets          = data.aws_subnet_ids.this.ids
+    subnets          = data.aws_subnets.this.ids
   }
 
 
