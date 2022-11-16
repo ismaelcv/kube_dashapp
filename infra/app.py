@@ -1,4 +1,3 @@
-# TODO: create deplyment role in stack
 # TODO : document
 
 
