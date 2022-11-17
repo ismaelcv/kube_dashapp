@@ -52,7 +52,10 @@ This repo is configured with the following features:
 # Build & Run docker image
 ```console
 docker build -t dashapp_skeleton:latest .
-docker run -p 8094:8094  dashapp_skeleton:latest
+
+# This command runs the container, pass aws credentials, and pass a environment variable
+
+docker run -p 8094:8094  --rm -it -v ~/.aws:/root/.aws:ro -e AWS_PROFILE=default  dashapp_skeleton:latest
 ```
 
 
@@ -92,112 +95,3 @@ cdk deploy
 cdk destroy
 ```
 
-Steps to create a running EC2 instance
-
-ECR - Create a new repository
-	- Private
-	- name: manual-private-dashapp-repo
-
-Push Docker image to ECR
-    - Follow Push commands for manual-private-dashapp-repo
-    - Or use CI/CD pipeline
-
-ECS Create new cluster
-    - Chose EC2 Linux + Networking
-    - Name: manual-private-cluster
-    - Instance type: t2.micro
-    - Number of Instances 1
-    - VPC: Select default vpc (AWS allocated)
-    - Subnet: Select default subnet !!!!!!!!!!!!!!(TODO)
-    - Auto assign public IP : Enabled  !!!!!!!!!!
-    - Security Group: Select default SG (AWS allocated) !!! Maybe add to the ApplicationLoadBalancedEc2Service
-    - Container instance IAM role: ecsInstanceRole !!!!!!!
-
-
-Create a IAM Role for task definition
-    - Select Elastic container service
-    - Select Elastic container service task
-    - Select AmazonS3FillAccess
-    - Select AmazonECSTaskExecutionRolePolicy
-    - Name: ManualPrivateDashappRole
-
-
-Create a Task Definition in ECS > Task Definitions
-    - Select EC2 instance
-    - Name: manualDashappTaskDefinition
-    - TaskRole: Select ManualPrivateDashappRole
-    - Task memory (MiB) : 100
-    - Task CPU (unit) : 1 vCPU
-    - Add Container
-        * Container Name: ManualPrivateDashappContainer
-        * Image: Copy image URI from repo
-        * Host Port 8094
-        * Container port 8094
-
-
-Port Map Inbound Rules EC2 > Instances > Security > Security group
-    - Edit Inbound Rules
-    - Delete Custom TCPs if not relevant
-    - Add Custom TCP 8094 Custom 0.0.0.0/0
-    - Add Custom TCP 8094 Custom ::/0
-
-
-Run the Task Definition ECS > Cluster > manual-private-cluster > Tasks
-    - Select EC2
-    - Select manualDashappTaskDefinition as task definition
-
-Access Instance in EC2 > Intances > Instance ID
-    - Copy Public IPv4 DNS and add the port at the end
-    - ec2-18-194-226-208.eu-central-1.compute.amazonaws.com:8094
-
-
-    Create a cluster
-    - Select Networking only
-    - give it a name
-    - do not select create a vpc
-    - create
-
-    Create a Task Definition
-    - Select fargate task definition
-    - Give it a name
-    - Select standard execution role
-    - Operating system is linux
-    - Select the smallest memory (1GB) and 0.5 Vcpu
-    - Attach a container
-        - Select container name
-        - Paste uri of the image we are adding + :latest
-        - Port mapping 8094 in tcp
-
-    Create a Service in the cluster
-    - Create a new service
-    - Select fargate service
-    - add a service name
-    - number of tasks :1
-    - next step
-    - Select the default vpc and all subnets in the vpc
-    - Security groups edit
-        - Create a new security group
-        - Give it a name
-        - Custom TCP 3001 Anywhere
-    - Select aplication load balancer
-    - Set health check grace period to 30
-    - Create a Load Balancer in EC2 > Load Balancers
-        - Select application load balancer
-        - give it a name
-        - Internet facing and IPv4
-        - Select all subnets inside the vpc
-        - Create a new security group
-            - Give it a name
-            - Description: allows traffic in port 80
-            - add name
-            - Custom TCP, port 80 Source anywhere
-        - Select the create security group
-        - Create a new target group
-            - Select Ip addresses
-            - Give the name to the target group
-            - add health/ as check path
-    - Select container to load balance
-        - Select 80 to production listerner port
-        - Select the target group that we created into the target group name
-    - next step and then next step and then create service
-    - We can check the DNS name on EC2 > Load balancers

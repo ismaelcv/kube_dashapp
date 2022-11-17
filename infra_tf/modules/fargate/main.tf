@@ -121,9 +121,6 @@ resource "aws_ecs_task_definition" "this" {
 }
 
 
-
-
-
 resource "aws_security_group" "alb" {
   name   = "${var.application_name}_lb_securityGroup"
   vpc_id = data.aws_vpc.this.id
