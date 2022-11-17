@@ -9,5 +9,3 @@ resource "aws_ecr_repository" "ecr" {
   }
   tags = var.tags
 }
-
-
