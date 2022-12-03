@@ -174,3 +174,4 @@ cdk.out/
 cdk.context.json
 .DS_Store
 .vscode/settings.json
+*h5
