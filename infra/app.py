@@ -64,10 +64,14 @@ class ECSAppDeploymentStack(Stack):
             env=ENVIRONMENT,
         )
 
-        repo = ecr.Repository.from_repository_name(self, id="repo_lookup", repository_name=f"{STACK_PREFIX}_repo")
+        repo = ecr.Repository.from_repository_name(
+            self, id="repo_lookup", repository_name=f"{STACK_PREFIX}_repo"
+        )
         vpc = ec2.Vpc.from_lookup(self, "VPC", is_default=True)
 
-        cluster = ecs.Cluster(self, id="Create Cluster", vpc=vpc, cluster_name=f"{STACK_PREFIX}_cluster")
+        cluster = ecs.Cluster(
+            self, id="Create Cluster", vpc=vpc, cluster_name=f"{STACK_PREFIX}_cluster"
+        )
 
         task_role = iam.Role(
             self,
@@ -75,7 +79,9 @@ class ECSAppDeploymentStack(Stack):
             role_name=f"{STACK_PREFIX}_taskdefrole",
             assumed_by=iam.ServicePrincipal("ecs-tasks.amazonaws.com"),
             managed_policies=[
-                iam.ManagedPolicy.from_aws_managed_policy_name("service-role/AmazonECSTaskExecutionRolePolicy"),
+                iam.ManagedPolicy.from_aws_managed_policy_name(
+                    "service-role/AmazonECSTaskExecutionRolePolicy"
+                ),
             ],
         )
 
@@ -92,7 +98,9 @@ class ECSAppDeploymentStack(Stack):
         )
 
         image = ecs.ContainerImage.from_ecr_repository(repo)
-        log_group = logs.LogGroup.from_log_group_name(self, id="get log group", log_group_name=STACK_PREFIX)
+        log_group = logs.LogGroup.from_log_group_name(
+            self, id="get log group", log_group_name=STACK_PREFIX
+        )
         log_driver = ecs.LogDrivers.aws_logs(log_group=log_group, stream_prefix=STACK_PREFIX)
 
         task_definition = ecs.FargateTaskDefinition(
@@ -119,8 +127,12 @@ class ECSAppDeploymentStack(Stack):
             allow_all_outbound=True,
             security_group_name="load_balancer",
         )
-        load_balancer_sg.add_ingress_rule(peer=ec2.Peer.any_ipv4(), connection=ec2.Port.tcp(CONTAINER_PORT))
-        load_balancer_sg.add_ingress_rule(peer=ec2.Peer.any_ipv6(), connection=ec2.Port.tcp(CONTAINER_PORT))
+        load_balancer_sg.add_ingress_rule(
+            peer=ec2.Peer.any_ipv4(), connection=ec2.Port.tcp(CONTAINER_PORT)
+        )
+        load_balancer_sg.add_ingress_rule(
+            peer=ec2.Peer.any_ipv6(), connection=ec2.Port.tcp(CONTAINER_PORT)
+        )
         load_balancer_sg.add_ingress_rule(peer=ec2.Peer.any_ipv4(), connection=ec2.Port.tcp(80))
 
         load_balancer = elb.ApplicationLoadBalancer(
@@ -146,8 +158,12 @@ class ECSAppDeploymentStack(Stack):
             allow_all_outbound=True,
             security_group_name="fargate_service",
         )
-        fargate_sg.add_ingress_rule(peer=ec2.Peer.any_ipv4(), connection=ec2.Port.tcp(CONTAINER_PORT))
-        fargate_sg.add_ingress_rule(peer=ec2.Peer.any_ipv6(), connection=ec2.Port.tcp(CONTAINER_PORT))
+        fargate_sg.add_ingress_rule(
+            peer=ec2.Peer.any_ipv4(), connection=ec2.Port.tcp(CONTAINER_PORT)
+        )
+        fargate_sg.add_ingress_rule(
+            peer=ec2.Peer.any_ipv6(), connection=ec2.Port.tcp(CONTAINER_PORT)
+        )
 
         ecs.FargateService(
             self,
