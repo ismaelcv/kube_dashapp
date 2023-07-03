@@ -1,6 +1,6 @@
 # Repo Skeleton
 
-This repository contains a barebone repository skeleton
+This repository contains a barebone repository skeleton 
 
 <Br>
 
