@@ -11,7 +11,7 @@ This repository contains a barebone repository skeleton
 - Change the name of the `repo_skeleton` folder to the name of your project
 - modify `tool.poetry` section in the `pyproject.toml` file
 
-## 2. Set up a local envrironment
+## 2. Set up a local envrironment 
 
 ```console
 pyenv virtualenv 3.9.12 project_name
